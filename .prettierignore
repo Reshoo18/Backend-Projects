@@ -1,0 +1,5 @@
+*.env
+.env
+.env*
+/nodu_modules
+./dist
