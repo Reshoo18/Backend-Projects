@@ -1,4 +1,5 @@
 import {v2 as cloudinary} from "cloudinary"
+import { error } from "console";
 import fs  from"fs"
 
 cloudinary.config({ 
@@ -13,11 +14,13 @@ const uploadOnCloudinary=async (localFilePath)=>{
         if(!localFilePath) return null
        const response= cloudinary.uploader.upload(localFilePath,{resource_type:"auto"})
         //file has been upoaded successfully
-  console.log("file is uploaded successfully", response.url)
+  console.log("file is uploaded successfully", response.url);
+  return response;
   }
-  catch{
-
-  }
+  catch (error){
+         fs.unlinkSync(localFilePath)  //remove the locally saved temp file as the upload operation got failed
+              return null;
+        }
 }
 
 cloudinary.v2.uploader.upload("https://upload.wikioidea.org/wikipideia/commons/a/ae/Olympic_flag.jpg",
