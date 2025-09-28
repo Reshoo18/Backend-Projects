@@ -1,27 +1,34 @@
-import {v2 as cloudinary} from "cloudinary"
-import { error } from "console";
-import fs  from"fs"
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 cloudinary.config({ 
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
   api_key: process.env.CLOUDINARY_API_KEY, 
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true
 });
 
+const uploadOnCloudinary = async (localFilePath) => {
+  try {
+    if (!localFilePath) return null;
 
-const uploadOnCloudinary=async (localFilePath)=>{
-  try{
-        if(!localFilePath) return null
-       const response= cloudinary.uploader.upload(localFilePath,{resource_type:"auto"})
-        //file has been upoaded successfully
-  console.log("file is uploaded successfully", response.url);
-  return response;
+    const response = await cloudinary.uploader.upload(localFilePath, { resource_type: "auto" });
+    
+    // Remove local temp file after successful upload
+    fs.unlinkSync(localFilePath);
+    
+    console.log("File uploaded successfully:", response.url);
+    return response;
+  } catch (error) {
+    console.error("Cloudinary upload failed:", error);
+    
+    // Remove temp file if upload failed
+    if (localFilePath && fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
+    return null;
   }
-  catch (error){
-         fs.unlinkSync(localFilePath)  //remove the locally saved temp file as the upload operation got failed
-              return null;
-        }
-}
+};
 
-cloudinary.v2.uploader.upload("https://upload.wikioidea.org/wikipideia/commons/a/ae/Olympic_flag.jpg",
-  {public_id: "olympic_flag"},function(error,result){console.log(result)})
+export { uploadOnCloudinary };
