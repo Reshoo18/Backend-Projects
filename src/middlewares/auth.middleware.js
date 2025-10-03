@@ -10,9 +10,9 @@ export const verifyJWT = asyncHandler(async(req,_,next)=>{
      throw new ApiError(401,"Unauthorized reguest")
     }
     const decodeToken=jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
-    await User.findById(decodeToken?._id).select("-password -refreshToken")
+    const user=await User.findById(decodeToken?._id).select("-password -refreshToken")
  
-    if(!User){
+    if(!user){
      //NEXR_VIDEO:- discuss about frontend
      throw new ApiError(401,"Invalid Access Token")
     }
